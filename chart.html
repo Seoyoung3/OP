@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>CHART</title>
+  <style>
+    html,
+    body {
+      height: 100%;
+      margin: 0;
+      background-color: #000;
+      /* 검은 배경 */
+      color: #eee;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      overflow: hidden;
+    }
+
+    nav {
+      background-color: rgba(17, 17, 17, 0.6);
+      backdrop-filter: blur(6px);
+      height: 60px;
+      display: flex;
+      align-items: center;
+      position: relative;
+      padding: 0 30px;
+      z-index: 1;
+      justify-content: space-between;
+      /* 요소들을 양 끝으로 정렬 */
+    }
+
+    a.logo-title {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      color: #bbb;
+      font-weight: bold;
+      font-size: 1.5rem;
+      user-select: none;
+      white-space: nowrap;
+      text-decoration: none;
+    }
+
+    .logo {
+      width: 40px;
+      height: 40px;
+    }
+
+    ul.nav-list {
+      position: absolute;
+      left: 50%;
+      transform: translateX(-50%);
+      display: flex;
+      gap: 30px;
+      list-style: none;
+      margin: 0;
+      padding: 0;
+    }
+
+    ul.nav-list li {
+      cursor: pointer;
+      padding: 8px 15px;
+      border-radius: 15px;
+      transition: background-color 0.3s ease, font-size 0.3s ease;
+    }
+
+    ul.nav-list li:hover,
+    ul.nav-list li:focus {
+      background-color: #555;
+      font-size: 1.1rem;
+      outline: none;
+    }
+
+    ul.nav-list li a {
+      color: #eee;
+      text-decoration: none;
+      display: block;
+    }
+
+    /* 오른쪽 버튼 그룹 컨테이너 */
+    .nav-buttons {
+      display: flex;
+      gap: 10px;
+      /* 버튼들 사이의 간격 */
+      align-items: center;
+    }
+
+    /* calc 버튼 스타일 */
+    .calc-button {
+      background-color: #007bff;
+      /* 버튼 배경색 */
+      color: white;
+      padding: 8px 15px;
+      border: none;
+      border-radius: 4px;
+      /* 직사각형 모양을 위한 테두리 둥글기 */
+      cursor: pointer;
+      text-decoration: none;
+      /* 링크 밑줄 제거 */
+      font-size: 1rem;
+      transition: background-color 0.3s ease;
+      white-space: nowrap;
+      /* 텍스트 줄바꿈 방지 */
+    }
+
+    .calc-button:hover {
+      background-color: #0056b3;
+      /* 호버 시 배경색 변경 */
+    }
+
+    /* CHAT 버튼 스타일 (제거됨 - 주석 처리 또는 삭제) */
+    /*
+    .chat-button {
+      background-color: #28a745;
+      color: white;
+      padding: 8px 15px;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      text-decoration: none;
+      font-size: 1rem;
+      transition: background-color 0.3s ease;
+      white-space: nowrap;
+    }
+
+    .chat-button:hover {
+      background-color: #1e7e34;
+    }
+    */
+
+    /* 오버레이 스타일 */
+    .overlay {
+      display: none;
+      /* 초기에는 숨김 */
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.7);
+      /* 어둡고 투명한 배경 */
+      backdrop-filter: blur(5px);
+      /* 블러 효과 */
+      z-index: 1000;
+      /* 다른 콘텐츠 위에 오도록 설정 */
+      justify-content: center;
+      align-items: center;
+    }
+
+    /* 모달 컨테이너 (계산기 창) 스타일 */
+    .modal-container {
+      background-color: #222;
+      /* 모달 배경색 */
+      border-radius: 10px;
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.5);
+      position: relative;
+      width: 90%;
+      /* 웹페이지 너비의 70% */
+      height: 90vh;
+      /* 뷰포트 높이의 70% */
+      max-width: 800px;
+      /* 최대 너비 제한 (너무 커지는 것 방지) */
+      max-height: 700px;
+      /* 최대 높이 제한 */
+      overflow: hidden;
+      /* iframe이 넘치지 않도록 */
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* iframe 스타일 */
+    .modal-container iframe {
+      flex-grow: 1;
+      /* 남은 공간을 모두 차지 */
+      width: 100%;
+      border: none;
+      /* iframe 기본 테두리 제거 */
+    }
+
+    /* 닫기 버튼 스타일 */
+    .modal-close-button {
+      position: absolute;
+      top: 10px;
+      right: 15px;
+      background: none;
+      border: none;
+      color: #fff;
+      font-size: 1.5rem;
+      cursor: pointer;
+      z-index: 1001;
+      /* 버튼이 오버레이 위에 오도록 */
+      padding: 5px;
+      border-radius: 50%;
+      transition: background-color 0.2s;
+    }
+
+    .modal-close-button:hover {
+      background-color: rgba(255, 255, 255, 0.2);
+    }
+
+    main {
+      height: calc(100% - 60px);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      text-align: center;
+      font-size: 2rem;
+      font-weight: bold;
+      overflow: hidden;
+      /* Ensure content doesn't overflow */
+    }
+
+    .chart-container {
+      width: 100%;
+      height: 100%;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      background-color: #1a1a1a;
+      /* Dark background for the chart area */
+    }
+  </style>
+</head>
+
+<body>
+  <nav>
+    <a href="main.html" class="logo-title" aria-label="Own View Logo and Title">
+      <svg class="logo" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Own View Logo">
+        <circle cx="50" cy="50" r="48" stroke="#888" stroke-width="4" fill="none" />
+        <polyline points="7,7 50,88 93,7" stroke="#888" stroke-width="6" fill="none" stroke-linejoin="round"
+          stroke-linecap="round" />
+      </svg>
+      Own View
+    </a>
+    <ul class="nav-list" role="menubar">
+      <li role="menuitem" tabindex="0"><a href="main.html">HOME</a></li>
+      <li role="menuitem" tabindex="0"><a href="chart.html">CHART</a></li>
+      <li role="menuitem" tabindex="0"><a href="view.html">VIEW</a></li>
+      <li role="menuitem" tabindex="0"><a href="news.html">NEWS</a></li>
+      <li role="menuitem" tabindex="0"><a href="chat.html">CHAT</a></li>
+    </ul>
+
+    <div class="nav-buttons">
+      <a href="calc.html" class="calc-button">Calc</a>
+    </div>
+  </nav>
+
+  <main>
+    <div class="chart-container">
+      <div class="tradingview-widget-container" style="height:100%; width:100%;">
+        <div id="tradingview_12345678"></div>
+        <script type="text/javascript" src="https://s3.tradingview.com/tv.js"></script>
+        /* TradingView에서 제공하는 차트 위젯 라이브러리(tv.js)를 외부 CDN에서 불러옴
+        이 스크립트가 로딩되면 전역 객체 TradingView가 생김 */
+        <script type="text/javascript">
+          new TradingView.widget(
+            {
+              "width": "100%",
+              "height": "100%",
+              "symbol": "NASDAQ:QQQ",
+              /* QQQ 심볼 */
+              "interval": "D",
+              /* 일별 차트 */
+              "timezone": "Etc/UTC",
+              "theme": "dark",
+              /* 다크 테마 */
+              "style": "1",
+              /* 차트 스타일 */
+              "locale": "kr",
+              /* 한국어 로케일 */
+              "toolbar_bg": "#f1f3f6",
+              "enable_publishing": false,
+              "allow_symbol_change": true,
+              "container_id": "tradingview_12345678" /* 위 div의 ID와 동일하게 설정 */
+            }
+          );
+        </script>
+      </div>
+    </div>
+  </main>
+
+  <div id="calculatorOverlay" class="overlay">
+    <div class="modal-container">
+      <iframe id="calculatorFrame" src="cal.html" frameborder="0"></iframe>
+      <button class="modal-close-button" aria-label="계산기 닫기">X</button>
+    </div>
+  </div>
+
+  <script>
+    // 오버레이 및 모달 관련 스크립트
+    const calcButton = document.querySelector('.calc-button');
+    const calculatorOverlay = document.getElementById('calculatorOverlay');
+    const calculatorFrame = document.getElementById('calculatorFrame');
+    const modalCloseButton = document.querySelector('.modal-close-button');
+
+    // calc 버튼 클릭 시 모달 열기
+    calcButton.addEventListener('click', (event) => {
+      event.preventDefault(); // 기본 링크 이동 방지
+      calculatorOverlay.style.display = 'flex'; // 오버레이 표시
+      document.body.style.overflow = 'hidden'; // 본문 스크롤 방지
+      // iframe src를 다시 로드하여 계산기 초기화 (필요시)
+      calculatorFrame.src = 'calc.html';
+    });
+
+    // 오버레이 클릭 시 모달 닫기 (모달 컨테이너 클릭 시에는 닫히지 않도록 방지)
+    calculatorOverlay.addEventListener('click', (event) => {
+      if (event.target === calculatorOverlay) { // 오버레이 자체를 클릭했을 때만 닫기
+        calculatorOverlay.style.display = 'none';
+        document.body.style.overflow = ''; // 본문 스크롤 허용
+      }
+    });
+
+    // 닫기 버튼 클릭 시 모달 닫기
+    modalCloseButton.addEventListener('click', () => {
+      calculatorOverlay.style.display = 'none';
+      document.body.style.overflow = '';
+    });
+
+    // ESC 키 눌렀을 때 모달 닫기
+    document.addEventListener('keydown', (event) => {
+      if (event.key === 'Escape' && calculatorOverlay.style.display === 'flex') {
+        calculatorOverlay.style.display = 'none';
+        document.body.style.overflow = '';
+      }
+    });
+  </script>
+</body>
+
+</html>

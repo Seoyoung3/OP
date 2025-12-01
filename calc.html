@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>환율 계산기</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background-color: #121212; /* 더 어두운 배경 */
+      color: #e0e0e0; /* 밝은 회색 텍스트 */
+      height: 100vh;
+      overflow: hidden;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .container {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      width: 70%; /* 화면 너비의 70% 사용 (더 크게) */
+      max-width: 600px; /* 최대 너비 600px (더 크게) */
+      height: auto;
+      min-height: 450px; /* 최소 높이 증가 */
+      background-color: #1e1e1e; /* 컨테이너 배경색도 어둡게 */
+      border-radius: 12px; /* 모서리 더 둥글게 */
+      padding: 25px; /* 패딩 증가 */
+      box-sizing: border-box;
+      box-shadow: 0 0 30px rgba(0, 0, 0, 0.7); /* 그림자 더 강하게 */
+    }
+
+    .section {
+      display: flex;
+      flex-direction: column;
+      align-items: stretch;
+      background-color: #2a2a2a; /* 섹션 배경색 */
+      border-radius: 10px; /* 모서리 둥글게 */
+      padding: 20px; /* 패딩 증가 */
+      box-sizing: border-box;
+      width: 100%;
+      height: auto;
+    }
+
+    .section h2 {
+      text-align: center;
+      font-size: 1.8rem; /* 제목 크기 더 크게 */
+      margin-bottom: 20px; /* 마진 증가 */
+      color: #ffffff; /* 흰색 제목 */
+    }
+
+    .display {
+      background-color: #000000; /* 완전 검은색 배경 */
+      color: #fafafa; /* 형광 녹색 유지 (깔끔하게) */
+      font-size: 2.2rem; /* 결과 표시 크기 더 크게 */
+      padding: 20px; /* 패딩 증가 */
+      border-radius: 6px; /* 모서리 둥글게 */
+      text-align: right;
+      margin-bottom: 20px; /* 마진 증가 */
+      font-family: 'Consolas', monospace;
+      word-break: break-all;
+    }
+
+    .exchange-input {
+      font-size: 1.3rem; /* 입력 필드 폰트 크기 증가 */
+      padding: 15px; /* 패딩 증가 */
+      border-radius: 6px; /* 모서리 둥글게 */
+      border: 1px solid #444444; /* 연한 회색 테두리 추가 */
+      background-color: #111111; /* 입력 필드 배경색 */
+      color: #e0e0e0; /* 입력 텍스트 색상 */
+      text-align: right;
+      width: 100%;
+      margin-bottom: 15px; /* 마진 증가 */
+      box-sizing: border-box;
+
+      /* 파이어폭스에서 스피너 없애기 */
+      .exchange-input {
+  appearance: textfield;
+  -webkit-appearance: none;
+  -moz-appearance: textfield;
+  /* 나머지 스타일 */
+}
+
+    }
+    .exchange-input::placeholder { /* 플레이스홀더 텍스트 색상 */
+        color: #888888;
+    }
+
+    /* 웹킷 브라우저(크롬, 사파리 등) 스피너 없애기 */
+    .exchange-input::-webkit-inner-spin-button,
+    .exchange-input::-webkit-outer-spin-button {
+      -webkit-appearance: none;
+      margin: 0;
+    }
+
+    /* 버튼 기본 스타일 */
+    .exchange-btn,
+    .toggle-btn {
+      color: white; /* 흰색 텍스트 */
+      border: none;
+      padding: 15px; /* 패딩 증가 */
+      font-size: 1.2rem; /* 폰트 크기 증가 */
+      border-radius: 6px; /* 모서리 둥글게 */
+      cursor: pointer;
+      transition: background-color 0.2s ease, transform 0.1s ease; /* 호버 효과 추가 */
+      width: 100%;
+      margin-top: 10px;
+    }
+
+    /* convert 버튼만 초록색 */
+    .exchange-btn {
+      background-color: #28a745; /* 초록색 */
+    }
+    .exchange-btn:hover {
+      background-color: #218838; /* 호버 시 더 진한 초록 */
+      transform: translateY(-2px);
+    }
+    .exchange-btn:active {
+      background-color: #1e7e34; /* 클릭 시 더 진한 초록 */
+      transform: translateY(0);
+    }
+
+    /* toggle 버튼 스타일 */
+    .toggle-btn {
+      background-color: #555555; /* 전환 버튼은 약간 다른 회색 */
+    }
+    .toggle-btn:hover {
+      background-color: #777777;
+      transform: translateY(-2px);
+    }
+    .toggle-btn:active {
+      background-color: #444444;
+      transform: translateY(0);
+    }
+
+    /* 반응형 디자인 */
+    @media (max-width: 600px) {
+      body {
+        height: auto; /* 모바일에서 높이 자동 조절 */
+        padding: 20px 0; /* 상하 패딩 추가 */
+      }
+      .container {
+        width: 90%;
+        max-width: none;
+        min-height: auto; /* 최소 높이 제한 제거 */
+        padding: 15px;
+        box-shadow: 0 0 15px rgba(0, 0, 0, 0.5);
+      }
+      .section {
+        padding: 15px;
+      }
+      .section h2 {
+        font-size: 1.6rem;
+        margin-bottom: 15px;
+      }
+      .display {
+        font-size: 1.8rem;
+        padding: 15px;
+        margin-bottom: 15px;
+      }
+      .exchange-input,
+      .exchange-btn,
+      .toggle-btn {
+        font-size: 1rem;
+        padding: 12px;
+        margin-top: 8px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="section">
+      <h2>Calculator (<span id="direction-label">USD → KRW</span>)</h2>
+      <div class="display" id="exchangeResult">₩0</div>
+      <input type="number" id="currencyInput" class="exchange-input" placeholder="" />
+      <button class="exchange-btn" id="convertBtn">Convert</button>
+      <button class="toggle-btn" id="toggleDirection">Switch</button>
+    </div>
+  </div>
+
+  <script>
+    // 환율 계산기
+    let exchangeRate = null;
+    let isUSDToKRW = true;
+
+    // TODO: 'YOUR_API_KEY'를 발급받은 실제 API 키로 교체하세요!
+    const API_KEY = 'faf2683d8e69080a1f954781'; 
+
+    async function fetchExchangeRate() {
+      try {
+        const res = await fetch(`https://v6.exchangerate-api.com/v6/${API_KEY}/latest/USD`);
+        const data = await res.json();
+
+        if (data && data.result === 'success') {
+          exchangeRate = data.conversion_rates.KRW;
+          console.log('환율 정보 로드 성공:', exchangeRate);
+        } else {
+          const errorMessage = data.result || '알 수 없는 API 응답 오류';
+          throw new Error("API 응답 실패: " + errorMessage);
+        }
+      } catch (err) {
+        console.error('환율 로딩 실패:', err);
+        exchangeRate = null;
+        document.getElementById('exchangeResult').textContent = "환율 로딩 실패: 네트워크 또는 API 문제";
+      }
+    }
+
+    fetchExchangeRate(); // 페이지 로드 시 환율 정보 가져오기
+
+    const convertBtn = document.getElementById('convertBtn');
+    const toggleBtn = document.getElementById('toggleDirection');
+    const label = document.getElementById('direction-label');
+    const input = document.getElementById('currencyInput');
+    const output = document.getElementById('exchangeResult');
+
+    convertBtn.addEventListener('click', () => {
+      const val = parseFloat(input.value);
+      if (!exchangeRate) {
+        output.textContent = "환율 로딩 실패";
+        return;
+      }
+      if (isNaN(val)) {
+        output.textContent = "Enter a number";
+        return;
+      }
+
+      let result;
+      if (isUSDToKRW) {
+        result = val * exchangeRate;
+        output.textContent = `₩${result.toLocaleString(undefined, { maximumFractionDigits: 2 })}`;
+      } else {
+        result = val / exchangeRate;
+        output.textContent = `$${result.toLocaleString(undefined, { maximumFractionDigits: 2 })}`;
+      }
+    });
+
+    toggleBtn.addEventListener('click', () => {
+      isUSDToKRW = !isUSDToKRW;
+      label.textContent = isUSDToKRW ? "USD → KRW" : "KRW → USD";
+      input.value = '';
+      output.textContent = isUSDToKRW ? '₩0' : '$0';
+    });
+  </script>
+</body>
+</html>

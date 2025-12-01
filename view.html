@@ -1,0 +1,523 @@
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>VIEW</title>
+  <style>
+    /* 기본 HTML/Body 스타일 */
+    html,
+    body {
+      height: 100%;
+      /* 뷰포트 전체 높이 사용 */
+      margin: 0;
+      /* 기본 여백 제거 */
+      background-color: #000;
+      /* 검은색 배경 */
+      color: #eee;
+      /* 기본 텍스트 색상 */
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      /* 폰트 설정 */
+      overflow: hidden;
+      /* 페이지 스크롤 방지 */
+    }
+
+    /* 네비게이션 바 스타일 */
+    nav {
+      background-color: rgba(17, 17, 17, 0.6);
+      /* 반투명 어두운 배경 */
+      backdrop-filter: blur(6px);
+      /* 블러 효과 */
+      height: 60px;
+      /* 고정 높이 */
+      display: flex;
+      align-items: center;
+      /* 세로 중앙 정렬 */
+      position: relative;
+      padding: 0 30px;
+      /* 좌우 패딩 */
+      z-index: 1;
+      /* 다른 요소 위에 표시 */
+      justify-content: space-between; /* 추가: 요소들을 양 끝으로 정렬 */
+    }
+
+    a.logo-title {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      /* 로고와 텍스트 간격 */
+      color: #bbb;
+      font-weight: bold;
+      font-size: 1.5rem;
+      user-select: none;
+      /* 드래그 방지 */
+      white-space: nowrap;
+      /* 줄바꿈 방지 */
+      text-decoration: none;
+      /* 밑줄 제거 */
+    }
+
+    .logo {
+      width: 40px;
+      height: 40px;
+    }
+
+    ul.nav-list {
+      position: absolute;
+      left: 50%;
+      transform: translateX(-50%);
+      /* 가로 중앙 정렬 */
+      display: flex;
+      gap: 30px;
+      /* 메뉴 항목 간 간격 */
+      list-style: none;
+      /* 리스트 점 제거 */
+      margin: 0;
+      padding: 0;
+    }
+
+    ul.nav-list li {
+      cursor: pointer;
+      /* 마우스 오버 시 포인터 변경 */
+      padding: 8px 15px;
+      border-radius: 15px;
+      transition: background-color 0.3s ease, font-size 0.3s ease;
+      /* 부드러운 전환 효과 */
+    }
+
+    ul.nav-list li:hover,
+    ul.nav-list li:focus {
+      background-color: #555;
+      font-size: 1.1rem;
+      outline: none;
+      /* 포커스 시 외곽선 제거 */
+    }
+
+    ul.nav-list li a {
+      color: #eee;
+      text-decoration: none;
+      display: block;
+    }
+    
+    /* 오른쪽 버튼 그룹 컨테이너 */
+    .nav-buttons {
+      display: flex;
+      gap: 10px;
+      /* 버튼들 사이의 간격 */
+      align-items: center;
+    }
+
+    /* calc 버튼 스타일 */
+    .calc-button {
+      background-color: #007bff; /* 버튼 배경색 */
+      color: white;
+      padding: 8px 15px;
+      border: none;
+      border-radius: 4px; /* 직사각형 모양을 위한 테두리 둥글기 */
+      cursor: pointer;
+      text-decoration: none; /* 링크 밑줄 제거 */
+      font-size: 1rem;
+      transition: background-color 0.3s ease;
+      white-space: nowrap; /* 텍스트 줄바꿈 방지 */
+    }
+
+    .calc-button:hover {
+      background-color: #0056b3; /* 호버 시 배경색 변경 */
+    }
+
+    /* CHAT 버튼 스타일 (제거됨 - 주석 처리 또는 삭제) */
+    /*
+    .chat-button {
+      background-color: #28a745;
+      color: white;
+      padding: 8px 15px;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      text-decoration: none;
+      font-size: 1rem;
+      transition: background-color 0.3s ease;
+      white-space: nowrap;
+    }
+
+    .chat-button:hover {
+      background-color: #1e7e34;
+    }
+    */
+
+    /* 오버레이 스타일 */
+    .overlay {
+        display: none; /* 초기에는 숨김 */
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.7); /* 어둡고 투명한 배경 */
+        backdrop-filter: blur(5px); /* 블러 효과 */
+        z-index: 1000; /* 다른 콘텐츠 위에 오도록 설정 */
+        justify-content: center;
+        align-items: center;
+    }
+
+    /* 모달 컨테이너 (계산기 창) 스타일 */
+    .modal-container {
+        background-color: #222; /* 모달 배경색 */
+        border-radius: 10px;
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.5);
+        position: relative;
+        width: 90%; /* 웹페이지 너비의 70% */
+        height: 90vh; /* 뷰포트 높이의 70% */
+        max-width: 800px; /* 최대 너비 제한 (너무 커지는 것 방지) */
+        max-height: 700px; /* 최대 높이 제한 */
+        overflow: hidden; /* iframe이 넘치지 않도록 */
+        display: flex;
+        flex-direction: column;
+    }
+
+    /* iframe 스타일 */
+    .modal-container iframe {
+        flex-grow: 1; /* 남은 공간을 모두 차지 */
+        width: 100%;
+        border: none; /* iframe 기본 테두리 제거 */
+    }
+
+    /* 닫기 버튼 스타일 */
+    .modal-close-button {
+        position: absolute;
+        top: 10px;
+        right: 15px;
+        background: none;
+        border: none;
+        color: #fff;
+        font-size: 1.5rem;
+        cursor: pointer;
+        z-index: 1001; /* 버튼이 오버레이 위에 오도록 */
+        padding: 5px;
+        border-radius: 50%;
+        transition: background-color 0.2s;
+    }
+
+    .modal-close-button:hover {
+        background-color: rgba(255, 255, 255, 0.2);
+    }
+
+    /* 메인 콘텐츠 영역 스타일 */
+    main {
+      height: calc(100% - 60px);
+      /* 헤더 높이를 제외한 나머지 높이 */
+      display: flex;
+      justify-content: center;
+      /* 내부 콘텐츠 가로 중앙 정렬 */
+      align-items: center;
+      /* 내부 콘텐츠 세로 중앙 정렬 */
+      padding: 20px;
+      /* 메인 영역의 외부 여백 */
+      box-sizing: border-box;
+      /* 패딩을 포함한 너비/높이 계산 */
+      overflow: hidden;
+      /* 메인 영역 내 스크롤 방지 */
+    }
+
+    /* 주식 그리드 컨테이너 스타일 */
+    .stock-grid {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      /* 5개 열, 각 열은 동일한 너비 */
+      grid-template-rows: repeat(2, 1fr);
+      /* 2개 행, 각 행은 동일한 높이 */
+      gap: 15px;
+      /* 그리드 아이템 간 간격 */
+      /* width와 height를 calc()로 지정하여 main 패딩을 제외한 공간을 채움 */
+      /* main의 외부 패딩(20px) + 그리드 자체 패딩(15px) = 총 35px 제외 */
+      width: calc(100% - 70px);
+      /* main의 좌우 20px + 그리드 자체 좌우 15px = 35px, 양쪽이니까 70px */
+      height: calc(100% - 70px);
+      /* main의 위아래 20px + 그리드 자체 위아래 15px = 35px, 위아래니까 70px */
+      padding: 15px;
+      /* 그리드 컨테이너 내부 패딩 */
+      box-sizing: border-box;
+      background-color: #111;
+      /* 그리드 배경색 */
+      border-radius: 10px;
+      /* 둥근 모서리 */
+      box-shadow: 0 10px 20px rgba(0, 0, 0, 0.5);
+      /* 그림자 효과 */
+      /* 최대 너비는 유지하고, 최대 높이를 줄여서 전체 그리드 세로 크기를 줄임 */
+      max-width: 1400px;
+      max-height: 550px;
+      /* 최대 높이 유지 */
+    }
+
+    /* 개별 주식 항목 스타일 */
+    .stock-item {
+      background-color: #222;
+      /* 아이템 배경색 */
+      border-radius: 10px;
+      /* 둥근 모서리 */
+      display: flex;
+      flex-direction: column;
+      /* 세로로 정렬 */
+      justify-content: center;
+      /* 세로 중앙 정렬 */
+      align-items: center;
+      /* 가로 중앙 정렬 */
+      padding: 8px;
+      /* 아이템 내부 패딩 조정 (세로 공간 줄이기 위해) */
+      text-align: center;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+      /* 그림자 */
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+      /* 호버 효과 */
+      aspect-ratio: 1 / 1;
+      /* 정사각형에 가깝게 조정하여 세로 크기 줄임 */
+    }
+
+    .stock-item:hover {
+      transform: translateY(-8px);
+      /* 위로 살짝 뜨는 효과 */
+      box-shadow: 0 8px 16px rgba(0, 0, 0, 0.4);
+    }
+
+    /* 로고 이미지를 위한 클래스 */
+    .stock-item img.stock-logo-img {
+      width: 70%;
+      /* 로고 이미지 너비 */
+      height: auto;
+      /* 높이 자동 조절 */
+      max-width: 80px;
+      /* 최대 너비 제한 (너무 커지는 것 방지) */
+      max-height: 80px;
+      /* 최대 높이 제한 */
+      object-fit: contain;
+      /* 이미지 비율 유지하며 컨테이너에 맞춤 */
+      margin-bottom: 5px;
+      /* 아래 여백 */
+    }
+
+    /* 로고 이미지를 위한 클래스 - ASML 로고 크기 조정 */
+    #stock-ASML img.stock-logo-img {
+      width: 80%; /* 기본값 70%에서 80%로 증가 */
+      height: auto;
+      max-width: 90px; /* 기본값 80px에서 90px로 증가 */
+      max-height: 90px; /* 기본값 80px에서 90px로 증가 */
+      object-fit: contain;
+      margin-bottom: 5px;
+    }
+
+    /* 티커 텍스트를 위한 스타일 (로고 아래에 작게 표시될 경우 사용) */
+    .stock-ticker-text {
+      font-size: 0.9rem;
+      /* 로고 아래에 티커 텍스트를 작게 표시 */
+      font-weight: bold;
+      color: #999;
+      /* 약간 흐린 색상 */
+      margin-top: 2px;
+      /* 로고와의 간격 */
+      line-height: 1;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+
+    .stock-change {
+      font-size: 1.6rem;
+      /* 등락률 숫자 크기 유지 */
+      font-weight: bold;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .positive {
+      color: #28a745;
+      /* 녹색 (상승) */
+    }
+
+    .negative {
+      color: #dc3545;
+      /* 빨간색 (하락) */
+    }
+  </style>
+</head>
+
+<body>
+  <nav>
+    <a href="main.html" class="logo-title" aria-label="Own View Logo and Title">
+      <svg class="logo" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Own View Logo">
+        <circle cx="50" cy="50" r="48" stroke="#888" stroke-width="4" fill="none" />
+        <polyline points="7,7 50,88 93,7" stroke="#888" stroke-width="6" fill="none" stroke-linejoin="round"
+          stroke-linecap="round" />
+      </svg>
+      Own View
+    </a>
+    <ul class="nav-list" role="menubar">
+    <li role="menuitem" tabindex="0"><a href="main.html">HOME</a></li>
+    <li role="menuitem" tabindex="0"><a href="chart.html">CHART</a></li>
+    <li role="menuitem" tabindex="0"><a href="view.html">VIEW</a></li>
+    <li role="menuitem" tabindex="0"><a href="news.html">NEWS</a></li>
+    <li role="menuitem" tabindex="0"><a href="chat.html">CHAT</a></li>
+  </ul>
+    <div class="nav-buttons">
+      <a href="calc.html" class="calc-button">Calc</a>
+    </div>
+  </nav>
+
+  <main>
+    <div class="stock-grid" id="stockGrid">
+    </div>
+  </main>
+
+  <div id="calculatorOverlay" class="overlay">
+    <div class="modal-container">
+        <iframe id="calculatorFrame" src="cal.html" frameborder="0"></iframe>
+        <button class="modal-close-button" aria-label="계산기 닫기">X</button>
+    </div>
+  </div>
+
+  <script>
+    const techStocks = [
+      { ticker: "TSLA", logo: "tesla.png" },
+      { ticker: "AAPL", logo: "apple.png" },
+      { ticker: "GOOGL", logo: "google.png" },
+      { ticker: "NVDA", logo: "nvidia.png" },
+      { ticker: "MSFT", logo: "microsoft.png" },
+      { ticker: "META", logo: "meta.png" },
+      { ticker: "AMZN", logo: "amazon.png" },
+      { ticker: "AVGO", logo: "avgo.png" },
+      { ticker: "AMD", logo: "amd.png" },
+      { ticker: "ASML", logo: "asml.png" }
+    ];
+
+    const stockGrid = document.getElementById('stockGrid');
+    const FINNHUB_API_KEY = "d0uk8opr01qn5fk5tov0d0uk8opr01qn5fk5tovg"; // Finnhub API 키
+
+    /**
+     * Finnhub API를 사용하여 주식 데이터를 가져오는 함수
+     */
+    async function fetchStockDataFromFinnhub(ticker) {
+      try {
+        const response = await fetch(`https://finnhub.io/api/v1/quote?symbol=${ticker}&token=${FINNHUB_API_KEY}`);
+        if (!response.ok) {
+          throw new Error(`HTTP 오류! 상태: ${response.status}`);
+        }
+        const data = await response.json();
+        // Finnhub의 quote API는 일일 퍼센트 변화를 'dp'로 반환합니다.
+        return data.dp; // dp는 일일 퍼센트 변화입니다.
+      } catch (error) {
+        console.error(`${ticker} 데이터 가져오는 중 Finnhub 오류:`, error);
+        return null; // 에러 발생 시 null 반환
+      }
+    }
+
+    function createStockItem(stockInfo) {
+      const item = document.createElement('div');
+      item.classList.add('stock-item');
+      item.id = `stock-${stockInfo.ticker}`;
+
+      const logoImg = document.createElement('img');
+      logoImg.classList.add('stock-logo-img');
+      // 모든 PNG 파일이 HTML 파일과 같은 폴더에 있으므로 'images/' 접두어를 제거했습니다.
+      logoImg.src = `${stockInfo.logo}`; 
+      logoImg.alt = `${stockInfo.ticker} 로고`;
+      item.appendChild(logoImg);
+
+      const tickerText = document.createElement('div');
+      tickerText.classList.add('stock-ticker-text');
+      tickerText.textContent = stockInfo.ticker;
+      item.appendChild(tickerText);
+
+      const change = document.createElement('div');
+      change.classList.add('stock-change');
+      change.textContent = '불러오는 중...'; // 초기 로딩 메시지
+      item.appendChild(change);
+
+      return item;
+    }
+
+    /**
+     * 주식 데이터를 가져와서 UI를 업데이트하는 함수
+     */
+    async function updateStockData(itemElement, ticker) {
+      try {
+        const changeValue = await fetchStockDataFromFinnhub(ticker); // Finnhub API에서 데이터 가져오기
+
+        const changeElement = itemElement.querySelector('.stock-change');
+
+        if (changeValue !== null && !isNaN(changeValue)) {
+          const changeText = parseFloat(changeValue).toFixed(2) + '%';
+          changeElement.textContent = changeText;
+
+          if (parseFloat(changeValue) > 0) {
+            changeElement.classList.add('positive');
+            changeElement.classList.remove('negative');
+          } else if (parseFloat(changeValue) < 0) {
+            changeElement.classList.add('negative');
+            changeElement.classList.remove('positive');
+          } else {
+            changeElement.classList.remove('positive', 'negative');
+          }
+        } else {
+          changeElement.textContent = "데이터 없음"; // 데이터가 없거나 에러 시
+          changeElement.classList.remove('positive', 'negative');
+        }
+      } catch (error) {
+        console.error(`${ticker} UI 업데이트 중 오류:`, error);
+        const changeElement = itemElement.querySelector('.stock-change');
+        changeElement.textContent = "에러";
+        changeElement.classList.remove('positive', 'negative');
+      }
+    }
+
+    // 페이지 로드 시 각 주식 아이템 생성 및 데이터 업데이트 시작
+    techStocks.forEach(stockInfo => {
+      const item = createStockItem(stockInfo);
+      stockGrid.appendChild(item);
+
+      // 초기 데이터 로드 및 10초마다 업데이트
+      updateStockData(item, stockInfo.ticker); 
+      setInterval(() => updateStockData(item, stockInfo.ticker), 10000); // 10초마다 반복 (API 호출 제한에 유의)
+    });
+
+    // 오버레이 및 모달 관련 스크립트
+    const calcButton = document.querySelector('.calc-button');
+    const calculatorOverlay = document.getElementById('calculatorOverlay');
+    const calculatorFrame = document.getElementById('calculatorFrame');
+    const modalCloseButton = document.querySelector('.modal-close-button');
+
+    // calc 버튼 클릭 시 모달 열기
+    calcButton.addEventListener('click', (event) => {
+        event.preventDefault(); // 기본 링크 이동 방지
+        calculatorOverlay.style.display = 'flex'; // 오버레이 표시
+        document.body.style.overflow = 'hidden'; // 본문 스크롤 방지
+        // iframe src를 다시 로드하여 계산기 초기화 (필요시)
+        calculatorFrame.src = 'calc.html'; 
+    });
+
+    // 오버레이 클릭 시 모달 닫기 (모달 컨테이너 클릭 시에는 닫히지 않도록 방지)
+    calculatorOverlay.addEventListener('click', (event) => {
+        if (event.target === calculatorOverlay) { // 오버레이 자체를 클릭했을 때만 닫기
+            calculatorOverlay.style.display = 'none';
+            document.body.style.overflow = ''; // 본문 스크롤 허용
+        }
+    });
+
+    // 닫기 버튼 클릭 시 모달 닫기
+    modalCloseButton.addEventListener('click', () => {
+        calculatorOverlay.style.display = 'none';
+        document.body.style.overflow = '';
+    });
+
+    // ESC 키 눌렀을 때 모달 닫기
+    document.addEventListener('keydown', (event) => {
+        if (event.key === 'Escape' && calculatorOverlay.style.display === 'flex') {
+            calculatorOverlay.style.display = 'none';
+            document.body.style.overflow = '';
+        }
+    });
+  </script>
+</body>
+
+</html>
